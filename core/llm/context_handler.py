@@ -1,6 +1,6 @@
-from base import ChatMessage
-from _decorators import sliding_context_window
 from typing import Literal
+from _decorators import sliding_context_window
+from base import ChatMessage
 
 
 class ContextStateMachine:
@@ -10,7 +10,7 @@ class ContextStateMachine:
         self.system_prompt = ChatMessage(role="system", text=system_prompt)
         self.messages_lst = [self.system_prompt]
 
-    @sliding_context_window(20)
+    @sliding_context_window(max_context_length=20)
     def add_msg(self, msg: ChatMessage) -> None:
         self.messages_lst.append(msg)
 

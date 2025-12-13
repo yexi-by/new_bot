@@ -1,15 +1,24 @@
+import asyncio
+import logging
+from functools import wraps
+
+import httpx
+from google.genai import errors as GErrors
+from openai import (
+    APIConnectionError as OAConnectionError,
+)
+from openai import (
+    APIError as OAAPIError,
+)
+from openai import (
+    APITimeoutError as OATimeoutError,
+)
 from openai import (
     OpenAIError,
-    APIError as OAAPIError,
-    APIConnectionError as OAConnectionError,
-    APITimeoutError as OATimeoutError,
+)
+from openai import (
     RateLimitError as OARateLimitError,
 )
-from google.genai import errors as GErrors
-import httpx
-from functools import wraps
-import logging
-import asyncio
 
 
 def check(func):
@@ -63,7 +72,7 @@ def sliding_context_window(max_context_length: int):
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)
             if len(self.messages_lst) > max_context_length:
-                del self.messages_lst[1]
+                del self.messages_lst[1:3]
             return result
 
         return wrapper
