@@ -1,5 +1,4 @@
 import base64
-from _decorators import check
 from base import ChatMessage, LLMProvider
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -30,8 +29,7 @@ class OpenAIService(LLMProvider):
             msg_dict["content"] = content_lst
             chat_messages.append(msg_dict)
         return chat_messages
-    
-    @check
+
     async def get_ai_response(
         self,
         messages: list[ChatMessage],

@@ -1,7 +1,16 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, ConfigDict, model_validator
 from typing import Literal
-from _decorators import retry_policy
+
+from openai import APIConnectionError, APITimeoutError, RateLimitError
+from pydantic import BaseModel, ConfigDict, model_validator
+from tenacity import (
+    AsyncRetrying,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_result,
+)
+
 from config import LLMConfig
 
 
@@ -46,13 +55,24 @@ class ResilientLLMProvider(LLMProvider):
     async def get_ai_response(
         self, messages: list[ChatMessage], model: str, **kwargs
     ) -> str:
-        @retry_policy(
-            retry_count=self.llm_config.retry_count,
-            retry_delay=self.llm_config.retry_delay,
-        )
-        async def _call_impl():
-            return await self.inner_provider.get_ai_response(
-                messages=messages, model=model, **kwargs
+        async for attempt in AsyncRetrying(
+            stop=stop_after_attempt(self.llm_config.retry_count),
+            wait=wait_exponential(
+                multiplier=1, min=self.llm_config.retry_delay, max=10
+            ),
+            retry=retry_if_exception_type(
+                (
+                    RateLimitError,
+                    APIConnectionError,
+                    APITimeoutError,
+                )
             )
+            | retry_if_result(lambda x: not x),
+        ):
+            with attempt:
+                response = await self.inner_provider.get_ai_response(
+                    messages=messages, model=model, **kwargs
+                )
+                return response
 
-        return await _call_impl()
+        raise RuntimeError("所有重试后仍未能获取AI响应")

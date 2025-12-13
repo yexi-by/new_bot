@@ -1,18 +1,21 @@
 from typing import Literal
-from _decorators import sliding_context_window
 from base import ChatMessage
 
 
 class ContextStateMachine:
     """上下文管理"""
 
-    def __init__(self, system_prompt: str) -> None:
+    def __init__(self, system_prompt: str, max_context_length: int) -> None:
+        if max_context_length < 2:
+            raise ValueError(f"最大上下文必须大于1,当前设置: {max_context_length}")
         self.system_prompt = ChatMessage(role="system", text=system_prompt)
         self.messages_lst = [self.system_prompt]
+        self.max_context_length = max_context_length
 
-    @sliding_context_window(max_context_length=20)
     def add_msg(self, msg: ChatMessage) -> None:
         self.messages_lst.append(msg)
+        if len(self.messages_lst) > self.max_context_length:
+            del self.messages_lst[1:3]
 
     def build_chatmessage(
         self,

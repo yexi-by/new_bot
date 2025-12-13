@@ -2,7 +2,6 @@ from google import genai
 from google.genai import types
 from base import ChatMessage, LLMProvider
 from typing import cast
-from _decorators import check
 
 
 class GeminiAIService(LLMProvider):
@@ -20,7 +19,9 @@ class GeminiAIService(LLMProvider):
         }
         for msg in messages:
             if msg.role == "system":
-                system_prompt = cast(str,msg.text) #由于系统提示词不会是None，直接断言,
+                system_prompt = cast(
+                    str, msg.text
+                )  # 由于系统提示词不会是None，直接断言,
                 continue
             role = role_map[msg.role]
             parts = []
@@ -33,8 +34,6 @@ class GeminiAIService(LLMProvider):
             content = types.Content(role=role, parts=parts)
             chat_messages.append(content)
         return chat_messages, system_prompt
-    
-    @check
     async def get_ai_response(
         self,
         messages: list[ChatMessage],
