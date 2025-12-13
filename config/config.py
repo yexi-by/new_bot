@@ -9,6 +9,8 @@ class LLMConfig(BaseModel):
     llm_name: str
     model_name: str
     provider_type: str
+    retry_count:int
+    retry_delay:int
 
 
 class Settings(BaseSettings):

@@ -3,7 +3,7 @@ from google.genai import types
 from openai import AsyncOpenAI
 from gemini_llm import GeminiAIService
 from openai_llm import OpenAIService
-from base import ChatMessage,LLMProviderWrapper
+from base import ChatMessage, LLMProviderWrapper, ResilientLLMProvider
 from config import Settings, ModelParameterManager
 
 
@@ -32,12 +32,15 @@ class LLMHandler:
             ),
         }
         for model_config in self.llm_settings:
-            service_factory = model_map.get(model_config.provider_type)
-            if service_factory is None:
+            factory = model_map.get(model_config.provider_type)
+            if factory is None:
                 raise ValueError(f"未知的模型服务类型: {model_config.provider_type}")
-            servicel = service_factory(model_config.api_key, model_config.base_url)
+            raw_service = factory(model_config.api_key, model_config.base_url)
+            safe_service = ResilientLLMProvider(
+                inner_provider=raw_service, llm_config=model_config
+            )
             self.service_map[model_config.llm_name] = LLMProviderWrapper(
-                model_name=model_config.model_name, provider=servicel
+                model_name=model_config.model_name, provider=safe_service
             )
 
     async def get_ai_text_response(

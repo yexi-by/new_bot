@@ -32,7 +32,7 @@ def check(func):
     return wrapper
 
 
-def retry_policy(retry_count: int):
+def retry_policy(retry_count: int, retry_delay: int):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs) -> str:
@@ -53,7 +53,7 @@ def retry_policy(retry_count: int):
                 ) as e:  # 未来可能需要将这些错误区分解耦 不同错误应对不同的处理方式 待实现
                     last_exception = e
                     logging.warning(f"Retry error: {e}")
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(retry_delay)
             if last_exception:
                 raise last_exception
             raise ValueError("达到最大次数且无具体异常信息")

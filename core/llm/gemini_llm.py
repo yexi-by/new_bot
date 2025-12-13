@@ -2,7 +2,7 @@ from google import genai
 from google.genai import types
 from base import ChatMessage, LLMProvider
 from typing import cast
-from _decorators import check,retry_policy
+from _decorators import check
 
 
 class GeminiAIService(LLMProvider):
@@ -34,7 +34,6 @@ class GeminiAIService(LLMProvider):
             chat_messages.append(content)
         return chat_messages, system_prompt
     
-    @retry_policy(5)
     @check
     async def get_ai_response(
         self,

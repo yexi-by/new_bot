@@ -1,5 +1,5 @@
 import base64
-from _decorators import check,retry_policy
+from _decorators import check
 from base import ChatMessage, LLMProvider
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
@@ -31,7 +31,6 @@ class OpenAIService(LLMProvider):
             chat_messages.append(msg_dict)
         return chat_messages
     
-    @retry_policy(5)
     @check
     async def get_ai_response(
         self,
