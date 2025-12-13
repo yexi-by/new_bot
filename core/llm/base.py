@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
-from typing import Literal
+from schemas import ChatMessage
+
+
 
 
 class LLMProvider(ABC):
@@ -17,10 +18,7 @@ class LLMProvider(ABC):
     ) -> str:
         pass
 
-class ChatMessage(BaseModel):
-    role: str
-    text: str
-    image: bytes
-
-
+    @abstractmethod
+    def _format_chat_messages(self, messages: list[ChatMessage]) -> list | tuple:
+        pass
 

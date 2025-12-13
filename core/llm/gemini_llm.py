@@ -1,10 +1,11 @@
 from google import genai
 from google.genai import types
 from base import ChatMessage, LLMProvider
+from typing import cast
 from _decorators import check,retry_policy
 
 
-class GeMiniAIService(LLMProvider):
+class GeminiAIService(LLMProvider):
     def __init__(self, client: genai.Client) -> None:
         self.client = client
 
@@ -19,7 +20,7 @@ class GeMiniAIService(LLMProvider):
         }
         for msg in messages:
             if msg.role == "system":
-                system_prompt = msg.text
+                system_prompt = cast(str,msg.text) #由于系统提示词不会是None，直接断言,
                 continue
             role = role_map[msg.role]
             parts = []
