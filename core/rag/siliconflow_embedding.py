@@ -1,7 +1,15 @@
 import json
 import httpx
 from config import Settings
-
+class AsycnSF:
+    def __init__(self,apk_key:str,base_url:str,proxy:str|None=None) -> None:
+        self.apk_key=apk_key
+        self.base_url=base_url
+        self.proxy=proxy
+        
+    def get_vector_coordinates(self):
+        ...
+        
 class SiliconFlowEmbedding:
     def __init__(self,settings:Settings) -> None:
         self.siliconflow_setting=None
