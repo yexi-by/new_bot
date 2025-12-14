@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,model_validator
 from pydantic_settings import BaseSettings
 import tomllib
+from typing import Any
 
 
 class LLMConfig(BaseModel):
@@ -21,17 +22,19 @@ class EmbeddingConfig(BaseModel):
 
 
 class Settings(BaseSettings):
-    llm_settings: list[LLMConfig]
-    embedding_settings: list[EmbeddingConfig]
-
-    def __init__(self):
-        data = self.load_config()
-        super().__init__(**data)
-
-    def load_config(self):
+    llm_settings: list[LLMConfig]=[]
+    embedding_settings: list[EmbeddingConfig]=[]
+    
+    @model_validator(mode='before')
+    @classmethod
+    def load_config_from_toml(cls, data: Any) -> Any:
+        if isinstance(data, dict) and data:
+            return data
         with open("config.toml", "rb") as f:
-            data = tomllib.load(f)
+            toml_data = tomllib.load(f)
+            return toml_data
         return data
+        
 
 
 class ModelParameterManager:

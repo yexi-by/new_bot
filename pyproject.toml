@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "bidict>=0.23.1",
     "dishka>=1.7.2",
-    "google-genai>=1.53.0",
-    "openai>=2.9.0",
+    "google-genai>=1.55.0",
+    "openai>=2.11.0",
     "pydantic-settings>=2.12.0",
 ]
