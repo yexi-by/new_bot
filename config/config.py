@@ -19,6 +19,9 @@ class EmbeddingConfig(BaseModel):
     base_url: str
     model_name: str
     provider_type: str
+    retry_count: int
+    retry_delay: int
+
 
 
 class Settings(BaseSettings):

@@ -1,29 +1,20 @@
-import json
 import httpx
-from config import Settings
-class AsycnSF:
-    def __init__(self,apk_key:str,base_url:str,proxy:str|None=None) -> None:
-        self.apk_key=apk_key
-        self.base_url=base_url
-        self.proxy=proxy
-        
-    def get_vector_coordinates(self):
-        ...
-        
-class SiliconFlowEmbedding:
-    def __init__(self,settings:Settings) -> None:
-        self.siliconflow_setting=None
-        for i in settings.embedding_settings:
-            if i.provider_type=="siliconflow":
-                self.siliconflow_setting=i
-                break
-        if self.siliconflow_setting is None:
-            raise ValueError("未找到硅基流动配置")
-        self.api_key=self.siliconflow_setting.api_key
-        self.base_url=self.siliconflow_setting.base_url
-        self.model_name=self.siliconflow_setting.model_name
-        
-        
-    async 
-    
-    
+from base import EmbeddingProvider
+
+class SiliconFlowEmbedding(EmbeddingProvider):
+    def __init__(self, apk_key: str, base_url: str, client: httpx.AsyncClient) -> None:
+        self.apk_key = apk_key
+        self.base_url = base_url
+        self.client = client
+
+    async def get_vector(self, model_name: str, input_text: str,**kwargs,) -> str:
+        payload = {"model": model_name, "input": input_text}
+        headers = {
+            "Authorization": f"Bearer {self.apk_key}",
+            "Content-Type": "application/json",
+        }
+        response = await self.client.post(self.base_url, json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+

@@ -1,3 +1,3 @@
-from .config import Settings,LLMConfig
+from .config import Settings,LLMConfig,EmbeddingConfig
 from .config import ModelParameterManager
-__all__=["Settings","ModelParameterManager","LLMConfig"]
+__all__=["Settings","ModelParameterManager","LLMConfig","EmbeddingConfig"]
