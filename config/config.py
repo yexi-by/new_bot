@@ -26,7 +26,7 @@ class EmbeddingConfig(BaseModel):
 
 class Settings(BaseSettings):
     llm_settings: list[LLMConfig]=[]
-    embedding_settings: list[EmbeddingConfig]=[]
+    embedding_settings: EmbeddingConfig
     
     @model_validator(mode='before')
     @classmethod

@@ -9,19 +9,6 @@ from tenacity import (
 )
 
 
-class EmbeddingProvider(ABC):
-    """
-    所有 Embedding 服务商必须继承的基类
-    """
-
-    @abstractmethod
-    async def get_vector(
-        self,
-        model_name: str,
-        input_text: str,
-        **kwargs,
-    ) -> str:
-        pass
 
 
 class ResilientLLMProvider(EmbeddingProvider):
