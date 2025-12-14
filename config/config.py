@@ -9,12 +9,20 @@ class LLMConfig(BaseModel):
     llm_name: str
     model_name: str
     provider_type: str
-    retry_count:int
-    retry_delay:int
+    retry_count: int
+    retry_delay: int
+
+
+class EmbeddingConfig(BaseModel):
+    api_key: str
+    base_url: str
+    model_name: str
+    provider_type: str
 
 
 class Settings(BaseSettings):
     llm_settings: list[LLMConfig]
+    embedding_settings: list[EmbeddingConfig]
 
     def __init__(self):
         data = self.load_config()

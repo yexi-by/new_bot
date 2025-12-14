@@ -1,4 +1,4 @@
-[[llm_model]]
+[[llm_settings]]
 api_key = ""
 base_url = ""
 llm_name = "deepseek"
@@ -7,7 +7,7 @@ provider_type = "openai"
 retry_count="3"
 retry_delay="1"
 
-[[llm_model]]
+[[llm_settings]]
 api_key = ""
 base_url = ""
 llm_name = "gemini"
@@ -15,3 +15,9 @@ model_name="gemini-3-pro-preview"
 provider_type = "gemini"
 retry_count="3"
 retry_delay="1"
+
+[[embedding_settings]]
+api_key = "sk-bskcjrcbjmbkcsbovbjkydelvegydkbbebonpgkxlnuybtac"
+base_url = "https://api.siliconflow.cn/v1/embeddings"
+model_name="Qwen/Qwen3-Embedding-8B"
+provider_type="siliconflow"
