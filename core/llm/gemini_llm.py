@@ -34,6 +34,7 @@ class GeminiAIService(LLMProvider):
             content = types.Content(role=role, parts=parts)
             chat_messages.append(content)
         return chat_messages, system_prompt
+
     async def get_ai_response(
         self,
         messages: list[ChatMessage],
