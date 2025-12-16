@@ -8,7 +8,6 @@ class LLMConfig(BaseModel):
     api_key: str
     base_url: str
     model_vendors: str #模型厂商
-    model_name: str
     provider_type: str
     retry_count: int
     retry_delay: int

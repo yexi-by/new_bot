@@ -10,7 +10,7 @@ from config import Settings
 class LLMHandler:
     def __init__(self, settings: Settings) -> None:
         self.llm_settings = settings.llm_settings
-        self.services:list[LLMProviderWrapper]=[]
+        self.services: list[LLMProviderWrapper] = []
         self._register_instance()
 
     def _register_instance(self) -> None:
@@ -36,10 +36,9 @@ class LLMHandler:
             safe_service = ResilientLLMProvider(
                 inner_provider=raw_service, llm_config=model_config
             )
-            wrapper =LLMProviderWrapper(
+            wrapper = LLMProviderWrapper(
                 model_vendors=model_config.model_vendors,
-                model_name=model_config.model_name,
-                provider=safe_service 
+                provider=safe_service,
             )
             self.services.append(wrapper)
 
@@ -47,12 +46,13 @@ class LLMHandler:
         self,
         messages: list[ChatMessage],
         model_vendors: str,
+        model_name: str,
         **kwargs,
     ) -> str:
-        current_instance = self.service_map[model_vendors]
-        servicel = current_instance.provider
-        model_name = current_instance.model_name
-        ai_response = await servicel.get_ai_response(
-            messages=messages, model=model_name
-        )
-        return ai_response
+        for llm in self.services:
+            if llm.model_vendors != model_vendors:
+                continue
+            return await llm.provider.get_ai_response(
+                messages=messages, model=model_name
+            )
+        raise ValueError(f"未定义的服务商名:{model_vendors}")
