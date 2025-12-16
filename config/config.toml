@@ -1,7 +1,7 @@
 [[llm_settings]]
 api_key = ""
 base_url = ""
-llm_name = "deepseek"
+model_vendors = "deepseek"
 model_name="deepseek-reasoner"
 provider_type = "openai"
 retry_count="3"
@@ -10,7 +10,7 @@ retry_delay="1"
 [[llm_settings]]
 api_key = ""
 base_url = ""
-llm_name = "gemini"
+model_vendors = "google"
 model_name="gemini-3-pro-preview"
 provider_type = "gemini"
 retry_count="3"

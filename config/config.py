@@ -7,7 +7,7 @@ from typing import Any
 class LLMConfig(BaseModel):
     api_key: str
     base_url: str
-    llm_name: str
+    model_vendors: str #模型厂商
     model_name: str
     provider_type: str
     retry_count: int
@@ -26,7 +26,7 @@ class EmbeddingConfig(BaseModel):
 
 class Settings(BaseSettings):
     llm_settings: list[LLMConfig]=[]
-    embedding_settings: EmbeddingConfig
+    embedding_settings: EmbeddingConfig|None=None
     
     @model_validator(mode='before')
     @classmethod
@@ -38,15 +38,3 @@ class Settings(BaseSettings):
             return toml_data
         return data
         
-
-
-class ModelParameterManager:
-    def __init__(self, llm_settings: list[LLMConfig], llm_name: str = "gemini") -> None:
-        self.llm_settings = llm_settings
-        self.llm_name = llm_name
-
-    def switch_model(self, llm_name: str) -> None:
-        llm_names_lst = [setting.llm_name for setting in self.llm_settings]
-        if llm_name not in llm_names_lst:
-            raise ValueError(f"设置的模型不在配置中,当前模型列表为{llm_names_lst}")
-        self.llm_name = llm_name

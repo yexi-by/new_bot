@@ -43,6 +43,7 @@ class LLMProvider(ABC):
 
 class LLMProviderWrapper(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_vendors:str
     model_name: str
     provider: LLMProvider
 
