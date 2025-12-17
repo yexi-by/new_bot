@@ -3,19 +3,21 @@ api_key = ""
 base_url = ""
 model_vendors = "deepseek"
 provider_type = "openai"
-retry_count="3"
-retry_delay="1"
+retry_count=3
+retry_delay=1
 
 [[llm_settings]]
 api_key = ""
 base_url = ""
 model_vendors = "google"
 provider_type = "gemini"
-retry_count="3"
-retry_delay="1"
+retry_count=3
+retry_delay=1
 
 [[embedding_settings]]
 api_key = "sk-bskcjrcbjmbkcsbovbjkydelvegydkbbebonpgkxlnuybtac"
 base_url = "https://api.siliconflow.cn/v1/embeddings"
 model_name="Qwen/Qwen3-Embedding-8B"
 provider_type="siliconflow"
+retry_count=3
+retry_delay=1
