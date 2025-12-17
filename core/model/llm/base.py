@@ -1,16 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Literal
-
 from openai import APIConnectionError, APITimeoutError, RateLimitError
 from pydantic import BaseModel, ConfigDict, model_validator
-from tenacity import (
-    AsyncRetrying,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_result,
-)
-
+from utils import create_retry_manager
 from config import LLMConfig
 
 
@@ -43,7 +35,7 @@ class LLMProvider(ABC):
 
 class LLMProviderWrapper(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    model_vendors:str
+    model_vendors: str
     provider: LLMProvider
 
 
@@ -55,24 +47,18 @@ class ResilientLLMProvider(LLMProvider):
     async def get_ai_response(
         self, messages: list[ChatMessage], model: str, **kwargs
     ) -> str:
-        async for attempt in AsyncRetrying(
-            stop=stop_after_attempt(self.llm_config.retry_count),
-            wait=wait_exponential(
-                multiplier=1, min=self.llm_config.retry_delay, max=10
-            ),
-            retry=retry_if_exception_type(
-                (
-                    RateLimitError,
-                    APIConnectionError,
-                    APITimeoutError,
-                )
-            )
-            | retry_if_result(lambda x: not x),
-        ):
+        retry_count = self.llm_config.retry_count
+        retry_delay = self.llm_config.retry_delay
+        retrier = create_retry_manager(
+            retry_count=retry_count,
+            retry_delay=retry_delay,
+            error_types=(RateLimitError, APIConnectionError, APITimeoutError),
+            custom_checker=lambda x: not x,
+        )
+        async for attempt in retrier:
             with attempt:
                 response = await self.inner_provider.get_ai_response(
                     messages=messages, model=model, **kwargs
                 )
                 return response
-
-        raise RuntimeError("所有重试后仍未能获取AI响应")
+        raise RuntimeError("Retries exhausted") # 规避下类型检查,这行是死代码
