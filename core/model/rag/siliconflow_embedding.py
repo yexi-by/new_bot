@@ -5,39 +5,37 @@ from config import EmbeddingConfig
 
 class SiliconFlowEmbedding:
     def __init__(
-        self, embeddingconfig: EmbeddingConfig, client: httpx.AsyncClient
+        self, embedding_config: EmbeddingConfig, client: httpx.AsyncClient
     ) -> None:
-        self.embeddingconfig = embeddingconfig
-        self.apk_key = embeddingconfig.api_key
-        self.base_url = embeddingconfig.base_url
+        self.embedding_config = embedding_config
         self.client = client
 
-    async def _get_response(
+    async def _send_request(
         self,
-        model_name: str,
-        input_text: str,
+        model: str,
+        text: str,
         **kwargs,
-    ) -> str:
-        payload = {"model": model_name, "input": input_text}
+    ) -> dict:
+        payload = {"model": model, "input": text}
         headers = {
-            "Authorization": f"Bearer {self.apk_key}",
+            "Authorization": f"Bearer {self.embedding_config.api_key}",
             "Content-Type": "application/json",
         }
-        response = await self.client.post(self.base_url, json=payload, headers=headers)
+        response = await self.client.post(
+            self.embedding_config.base_url, json=payload, headers=headers
+        )
         response.raise_for_status()
         return response.json()
 
-    async def get_vector_representation(
+    async def get_embedding(
         self,
-        model_name: str,
-        input_text: str,
+        model: str,
+        text: str,
         **kwargs,
-    ) -> str:
-        retry_count = self.embeddingconfig.retry_count
-        retry_delay = self.embeddingconfig.retry_delay
+    ) -> dict:
         retrier = create_retry_manager(
-            retry_count=retry_count,
-            retry_delay=retry_delay,
+            retry_count=self.embedding_config.retry_count,
+            retry_delay=self.embedding_config.retry_delay,
             error_types=(
                 httpx.HTTPStatusError,
                 httpx.RequestError,
@@ -45,8 +43,6 @@ class SiliconFlowEmbedding:
         )
         async for attempt in retrier:
             with attempt:
-                response = await self._get_response(
-                    model_name=model_name, input_text=input_text, **kwargs
-                )
+                response = await self._send_request(model=model, text=text, **kwargs)
                 return response
         raise RuntimeError("Retries exhausted")  # 规避下类型检查,这行是死代码
