@@ -1,6 +1,7 @@
 import httpx
-from utils import create_retry_manager
+
 from config import EmbeddingConfig
+from utils.retry_utils import create_retry_manager
 
 
 class SiliconFlowEmbedding:
@@ -13,7 +14,7 @@ class SiliconFlowEmbedding:
     async def _send_request(
         self,
         model: str,
-        text: str,
+        text: str|list[str],
         **kwargs,
     ) -> dict:
         payload = {"model": model, "input": text}
@@ -30,7 +31,7 @@ class SiliconFlowEmbedding:
     async def get_embedding(
         self,
         model: str,
-        text: str,
+        text: str|list[str],
         **kwargs,
     ) -> dict:
         retrier = create_retry_manager(

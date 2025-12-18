@@ -1,7 +1,9 @@
 import base64
-from base import ChatMessage, LLMProvider
+
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
+
+from .base import ChatMessage, LLMProvider
 
 
 class OpenAIService(LLMProvider):

@@ -1,7 +1,9 @@
+from typing import cast
+
 from google import genai
 from google.genai import types
-from base import ChatMessage, LLMProvider
-from typing import cast
+
+from .base import ChatMessage, LLMProvider
 
 
 class GeminiAIService(LLMProvider):

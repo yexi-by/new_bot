@@ -1,10 +1,12 @@
 from google import genai
 from google.genai import types
 from openai import AsyncOpenAI
-from gemini_llm import GeminiAIService
-from openai_llm import OpenAIService
-from base import ChatMessage, LLMProviderWrapper, ResilientLLMProvider
+
 from config import Settings
+
+from .base import ChatMessage, LLMProviderWrapper, ResilientLLMProvider
+from .gemini_llm import GeminiAIService
+from .openai_llm import OpenAIService
 
 
 class LLMHandler:
