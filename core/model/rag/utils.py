@@ -174,8 +174,7 @@ async def async_process_pipeline(
     token_task = asyncio.create_task(
         token_dispenser(token_queue=token_queue, minute=minute)
     )
-
-    for i in range(consumer_count):
+    for _ in range(consumer_count):
         con = asyncio.create_task(
             consumer(
                 task_queue=task_queue,
@@ -186,11 +185,9 @@ async def async_process_pipeline(
             )
         )
         consumers.append(con)
-
     writer_task = asyncio.create_task(
         write_data(folder_path=folder_path, result_queue=result_queue)
     )
-
     producer_task = asyncio.create_task(
         producer(task_queue=task_queue, chunks=chunks, max_lines=max_lines)
     )
