@@ -1,8 +1,8 @@
 from google import genai
 from google.genai import types
 from openai import AsyncOpenAI
-
-from config import Settings
+from typing import Self
+from config import  LLMConfig
 
 from .base import ChatMessage, LLMProviderWrapper, ResilientLLMProvider
 from .gemini_llm import GeminiAIService
@@ -10,13 +10,13 @@ from .openai_llm import OpenAIService
 
 
 class LLMHandler:
-    def __init__(self, settings: Settings) -> None:
-        self.llm_settings = settings.llm_settings
-        self.services: list[LLMProviderWrapper] = []
-        self._register_instance()
+    def __init__(self, services: list[LLMProviderWrapper]) -> None:
+        self.services = services
 
-    def _register_instance(self) -> None:
+    @classmethod
+    def register_instance(cls, settings: list[LLMConfig]) -> Self:
         """注册实例"""
+        services = []
         model_map = {
             "openai": lambda api_key, base_url: OpenAIService(
                 client=AsyncOpenAI(api_key=api_key, base_url=base_url)
@@ -30,7 +30,7 @@ class LLMHandler:
                 )
             ),
         }
-        for model_config in self.llm_settings:
+        for model_config in settings:
             factory = model_map.get(model_config.provider_type)
             if factory is None:
                 raise ValueError(f"未知的模型服务类型: {model_config.provider_type}")
@@ -42,7 +42,8 @@ class LLMHandler:
                 model_vendors=model_config.model_vendors,
                 provider=safe_service,
             )
-            self.services.append(wrapper)
+            services.append(wrapper)
+        return cls(services=services)
 
     async def get_ai_text_response(
         self,

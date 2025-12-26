@@ -1,2 +1,3 @@
 from .ioc import MyProvider
-__all__ =["MyProvider"]
+from .model.api import BotApi
+__all__ =["MyProvider","BotApi"]

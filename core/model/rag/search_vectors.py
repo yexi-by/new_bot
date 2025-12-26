@@ -3,8 +3,8 @@
 import asyncio
 import json
 from pathlib import Path
-from typing import Any
-
+from typing import Any, Self
+import aiofiles
 import faiss
 import numpy as np
 
@@ -22,30 +22,38 @@ class SearchVectors:
         index: FAISS 索引对象，用于高效的向量相似度搜索。
     """
 
-    id_mapping: list[str]
-    index: faiss.Index
-
-    def __init__(self, directory: str) -> None:
+    def __init__(self, index: faiss.Index, id_mapping: list[str]) -> None:
         """初始化向量搜索实例。
 
+        注意：通常建议使用 create_from_directory 工厂方法进行实例化。
         Args:
-            directory: 包含 index.faiss 和 id_mapping.json 文件的目录路径。
+            index: 已加载的 FAISS 索引对象。
+            id_mapping: 已加载的 ID 映射列表。
         """
-        self.id_mapping, self.index = self._load_index_and_mapping(directory=directory)
+        self.id_mapping = id_mapping
+        self.index = index
 
-    def _load_index_and_mapping(self, directory: str) -> tuple[list[str], faiss.Index]:
-        """从指定目录加载 FAISS 索引和 ID 映射。"""
-        index_path = Path(directory) / "index.faiss"
-        mapping_path = Path(directory) / "id_mapping.json"
-        with open(mapping_path, "r", encoding="utf-8") as f:
-            content = f.read()
+    @classmethod
+    async def create_from_directory(
+        cls,
+        directory: str,
+        index_filename: str = "index.faiss",
+        mapping_filename: str = "id_mapping.json",
+    ) -> Self:
+        dir_path = Path(directory)
+        index_path = dir_path / index_filename
+        mapping_path = dir_path / mapping_filename
+        async with aiofiles.open(mapping_path, "r", encoding="utf-8") as f:
+            content = await f.read()
             id_mapping: list[str] = json.loads(content)
-        with open(index_path, "rb") as f:
-            index_bytes = f.read()
-            index: faiss.Index = faiss.deserialize_index(
-                np.frombuffer(index_bytes, dtype=np.uint8)
+        async with aiofiles.open(index_path, "rb") as f:
+            index_bytes = await f.read()
+            index: faiss.Index = await asyncio.to_thread(
+                lambda: faiss.deserialize_index(
+                    np.frombuffer(index_bytes, dtype=np.uint8)
+                )
             )
-        return id_mapping, index
+        return cls(index=index, id_mapping=id_mapping)
 
     async def search(
         self,
@@ -64,7 +72,7 @@ class SearchVectors:
             匹配的文档 ID 列表，按相似度降序排列。
         """
         query_np = np.array([query_vector], dtype="float32")
-        await asyncio.to_thread(faiss.normalize_L2, query_np)
+        await asyncio.to_thread(faiss.normalize_L2, query_np)  # 归一化
         distances: np.ndarray
         indices: np.ndarray
         distances, indices = await asyncio.to_thread(self.index.search, query_np, top_k)  # type: ignore
